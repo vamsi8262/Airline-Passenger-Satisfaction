@@ -1,0 +1,768 @@
+---
+title: "AIRLINE PASSENGER SATISFACTION"
+author: "TEAM 7- Richik Ghosh, Shreya Sahay, Sanika Narayanapethkar, Vamsidhar Boddu"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    code_folding: hide
+    highlight: pygments
+---
+
+<style type="text/css">
+p{ /* Normal  */
+   font-size: 18px;
+}
+body{ /* Normal  */
+   font-size: 18px;
+}
+td {  /* Table  */
+   font-size: 14px;
+}
+h1 { /* Header 1 */
+ font-size: 32px;
+}
+h2 { /* Header 2 */
+ font-size: 26px;
+}
+h3 { /* Header 3 */
+ font-size: 22px;
+}
+code.r{ /* Code block */
+  font-size: 14px;
+}
+pre { /* Code block */
+  font-size: 14px
+}
+body {
+  text-align: justify;
+}
+</style>
+```{r,echo=FALSE}
+library(ezids)
+library(kableExtra)
+library(ggplot2)
+library(prettydoc)
+```
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(warning = F, results = "hide", message = F)
+options(scientific=T, digits = 3) 
+```
+# Abstract
+
+For our midterm project, our team investigated "Airline Passenger Satisfaction" using a dataset of 103,904 reviews sourced from Kaggle. The study delved into passengers demographic details, including age, gender, travel purpose, and class, along with factors like arrival/departure delay, flight distance, and service ratings (ranging from 0 to 5). We aimed to assess passenger satisfaction comprehensively, evaluating aspects like in-flight Wi-Fi, check-in service, cleanliness, seat comfort, food, and more. Our analysis, documented in an R Markdown file on our GitHub repository, utilized diverse visualizations and statistical methods. The goal was to identify service shortcomings and propose enhancements, striving to enhance overall passenger experiences, ensuring hassle-free and memorable journeys, and making every investment worthwhile.
+
+# Introduction
+
+Our motivation for this project stemmed from our experiences as international students facing uncertainties during air travel. Discovering that 52% of US air travelers express discomfort, we were intrigued. Recognizing the potential profitability in solving this issue, we analyzed factors and dynamics essential for promoters to enhance customer satisfaction in the second-largest global transportation system.
+
+For our midterm project, our team investigated "Airline Passenger Satisfaction" using a dataset of 103,904 reviews sourced from Kaggle. The study delved into passengers demographic details, including age, gender, travel purpose, and class, along with factors like arrival/departure delay, flight distance, and service ratings (ranging from 0 to 5). We aimed to assess passenger satisfaction comprehensively, evaluating aspects like inflight Wi-Fi, check-in service, cleanliness, seat comfort, food, and more. Our analysis, documented in an R Markdown file on our GitHub repository, utilized diverse visualizations and statistical methods. The goal was to identify service shortcomings and propose enhancements, striving to enhance overall passenger experiences, ensuring hassle-free and memorable journeys, and making every investment worthwhile.
+
+# Introduction
+
+Our motivation for this project stemmed from our experiences as international students facing uncertainties during air travel. Discovering that 52% of US air travelers express discomfort, we were intrigued. Recognizing the potential profitability in solving this issue, we analyzed factors and dynamics essential for promoters to enhance customer satisfaction in the second-largest global transportation system.
+
+Service quality is crucial for transportation businesses to attract customers, differentiate from competitors, and enhance customer satisfaction, ultimately improving the overall passenger experience.
+
+The airline industry is experiencing growth, leading to competition through price wars, loyalty programs, and innovative marketing strategies. This shift towards consumer-oriented marketing is a response to changing market dynamics.
+
+The airline industry, valued at $762.8 billion in 2023, is the second largest global transportation system, with approximately 100,000 daily flights and 7 billion passengers in 2022.
+
+US air travelers, with 52% dissatisfaction, are the second largest global market, requiring high-quality service to attract customers, improve profit margins, and reduce marketing efforts.
+
+## Literature Survey
+
+A significant amount of research has been done to understand the factors that impact the satisfaction levels of passsengers on a global scale. Tsafarakis et al. [1] explained how the MUlticriteria Satisfaction Analysis (MUSA) technique can be employed to analyse the critical aspects in services that need to be improved. Namukasa [2] used the Statistical Package for Social Science (SPSS) method to analyse the impact of airline amenities on different stages of the journey, such as pre-flight, during flight and post flight, with the research centered around the Ugandan airline industry. Suki [3] centered their research around the Malaysian Airline Industry and conducted multi-level statistical analysis using Analysis of Moment Structure (AMOS) computer system's Structural Equation Modeling (SEM).
+
+
+# Data and Methodology
+
+The "Airline Passenger Satisfaction" project leverages a comprehensive dataset obtained from Kaggle, comprising responses from 103,904 airline customers. This dataset encompasses a variety of attributes, including gender, travel type, class, flight distance, and ratings on factors like check-in and overall hospitality.
+
+The objective of this project is to analyze passenger satisfaction and its relationship with different aspects of airline services.
+
+* __Data Preparation__
+
+    + Data Collection:
+      The dataset was sourced from Kaggle, a reputable data sharing platform, providing a rich pool of responses from airline passengers.
+    
+    + Data Cleaning: 
+      Rigorous data cleaning procedures were implemented to ensure accuracy and reliability. This involved handling null values, removing irrelevant columns, verifying data types, and ensuring consistency in the dataset. 
+    
+      We were able to replace 310 NA values with the column mean, and we got rid of two irrelevant variables using the `subset()` function, i.e., the 'id' and 'X' columns, since they were helpful only for data retrieval and identification and did not contribute much to data analysis.
+                        
+    + Feature Selection: 
+      Relevant features such as gender, travel type, class, flight distance, and satisfaction ratings were selected for analysis, aligning with the project's smart questions.
+      
+
+* __Methodological Approach__
+                      
+                        
+                        
+                        
+    + Descriptive Statistics: 
+     The dataset was initially explored by calculating summary statistics, revealing passenger satisfaction levels, class distribution, and rating trends. The study categorizes neutral and dissatisfied as the same, resulting in a single category.
+      
+    + Visualization Techniques: 
+      Data visualization tools were utilized to create insightful charts and graphs. Visual representation of data aided in presenting findings effectively, making complex patterns more understandable.
+
+    + Hypothesis Testing: 
+      Statistical tests such as t-tests were conducted to validate hypotheses, especially factors like service class and online booking satisfaction ratings.
+      
+    + Correlation Analysis: 
+      Correlation techniques were applied to examine relationships between variables. This was particularly useful in understanding the connections between overall satisfaction and other factors like in-flight entertainment quality, service class, online booking ease, and food and drink services.
+      
+    + Variable Factorization: 
+      We used the `as.factor()` function and factorized the qualitative variables `satisfaction`, `class`, and `type.Travel`, `gender`, and `customer.Type` to perform EDA.
+
+# Data preprocessing 
+## Data Import
+
+```{r,include=FALSE}
+
+data_pre<-data.frame(read.csv("Airlines_train.csv"))
+data<-data_pre
+```
+
+## Structure of the data
+
+```{r,echo=FALSE}
+str(data)
+```
+
+**Description of the variables:**
+
+* `id`: customer id 
+* `Gender`: male or female
+* `Customer.Type`: loyal or disloyal
+* `Age`: tells us the age in years 
+* `Type.Of.Travel`: personal or business
+* `Class`: business, eco, or eco plus
+* `Flight.Distance`: distance in nautical miles 
+* `Inflight.wifi.service`: rating of Wi-Fi service
+* `Departure.Arrival.time.convenient`: rating of time convenience 
+* `Ease.of.Online.booking`: rating of ease of convenience 
+* `Gate.location`: rating of gate location 
+* `Food.and.Drink`: rating of food and drink items served in-flight
+* `Online.boarding`: rating of boarding convenience
+* `Seat.comfort`: rating of comfort 
+* `Inflight.entertainment`: rating of how well customers were entertained 
+* `On.board.service`: rating of on-boarding service 
+* `Leg.room.service`: rating of space availability for legs
+* `Baggage.handling`: rating of handling baggage
+* `Checkin.service`: rating of check-in experience 
+* `Inflight.service`: rating of in-flight experience 
+* `cleanliness`: rating of cleanliness
+* `Departure.Delay.in.Minutes`: flight departure delay in minutes
+* `Arrival.Delay.in.minutes`: flight arrival delay in minutes  
+* `satisfaction`: rating of overall experience 
+
+**NOTE: All the ratings are on a scale of 0-5**
+
+
+These variables can be re-classified as:
+
+* Qualitative: `satisfaction`, `Class`, `Type.of.Travel`, `Gender`, `Customer.Type`
+
+* Quantitative: `id`, `Age`, `Flight.Distance`, `Inflight.wifi.service`, `Departure.Arrival.time.convenient`, `Ease.of.Online.booking`, `Gate.location`, `Food.and.Drink`, `Online.boarding`, `Seat.comfort`, `Inflight.entertainment`, `On.board.service`, `Leg.room.service`, `Baggage.handling`, `Checkin.service`, `Inflight.service`, `cleanliness`, `Departure.Delay.in.Minutes`, `Arrival.Delay.in.minutes`.
+
+## Removing irrelevant columns
+
+```{r,echo=FALSE}
+data<- subset(data_pre, select = -c(X, id))
+```
+
+Using the `subset()` function we removed the `id` and `X` columns since they were helpful only for data retrieval/identification and do not contribute much to data analysis.
+
+## Factoring the  Qualitative variables
+```{r,echo=FALSE}
+data$satisfaction<-as.factor(data$satisfaction)
+data$Class<-as.factor(data$Class)
+data$Type.of.Travel<-as.factor(data$Type.of.Travel)
+data$Gender<-as.factor(data$Gender)
+data$Customer.Type<-as.factor(data$Customer.Type)
+```
+
+We categorized qualitative variables (`satisfaction`, `Class`, `Type.of.Travel`, `Gender`, and `Customer.Type`) using `as.factor()` for concise EDA.
+
+## Summary of the data
+
+```{r,echo=FALSE,results='markup'}
+paste("The NA's in the dataset column Arrival.Delay.in.Minutes is:", sum(is.na(data$Arrival.Delay.in.Minutes)))
+summary(data)
+```
+
+
+The `summary()` function provides a statistical summary of the entire dataset. These lines of code generate a message that combines a text string with the `count` of `NA values` using the `is.na()` function in the `Arrival.Delay.in.Minutes` variable. 
+
+## Identification of Outliers using 'outlierKD2()'
+```{r,echo=FALSE,results='markup'}
+data2<-outlierKD2(data,Flight.Distance,rm=TRUE,boxplt = TRUE,qqplt = TRUE)
+data3<-outlierKD2(data,Departure.Delay.in.Minutes,rm=TRUE,boxplt = TRUE,qqplt = TRUE)
+data4<-outlierKD2(data3,Arrival.Delay.in.Minutes,rm=TRUE,boxplt = TRUE,qqplt = TRUE)
+```
+
+## Handling NA values
+
+```{r,include=FALSE}
+data$Arrival.Delay.in.Minutes[is.na(data$Arrival.Delay.in.Minutes)] = mean(data$Arrival.Delay.in.Minute,na.rm = TRUE)
+paste("The number of NA's in the dataset after Arrival Delay in Minute with mean is:", sum(is.na(data)))
+```
+ 
+ 
+ 
+We used the `sum(is.na())` method to calculate the find the total number of NA values replaced those with the mean.
+
+
+# Visualizations
+
+## Passenger Age Distribution
+
+```{r,echo=FALSE,results='markup'}
+
+ggplot(data, aes(x=Age)) +  geom_density(fill="#9FA8DA", color="#9FA8DA", alpha=0.6)+ theme_bw() + theme()+ ggtitle("Passenger Age Distribution")+labs(title = "Passenger Age Distribution",
+       x = "Age",
+       y = "Number of customers") 
+```
+
+
+
+The dataset spans a wide age range, capturing responses from individuals as young as 7 and as old as 85. The majority of respondents fall within the age bracket of 20 to 60 years, signifying that the dataset primarily represents the adult population. This diverse age distribution underscores the dataset's comprehensive nature, providing insights into passenger satisfaction across various ages.
+
+## Plotting the data's demographical aspects
+
+```{r,echo=FALSE,results='markup'}
+
+library(ggplot2)
+library(gridExtra)
+
+## Gender vs Satisfaction plot using bar plot
+
+gender_1 <- table(data$Gender)
+gender_dist <- as.data.frame(gender_1)
+names(gender_dist)<-c("Gender","count")
+                      
+ggplot(gender_dist, aes(x = Gender, y = count, fill = Gender)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Gender Distribution",
+       x = "Gender",
+       y = "Total Customers") +
+  scale_fill_manual(values = c("Male" = "#F06292", "Female" = "#9FA8DA", "Other" = "gray"))+ theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))
+
+
+## Overall satisfaction insight of the passengers
+
+ggplot(data, aes(x=satisfaction,fill=satisfaction))+geom_bar()+ggtitle("Total Satisfied and Neutral or Unsatisfied customers in the Dataset")+ theme_bw() +
+  theme()+ ylab("Total Customers") + xlab("Customer satisfaction")+ theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+
+## Type of Travel vs Satisfaction plot using bar plot
+
+ggplot(data, aes(x=Type.of.Travel,fill=satisfaction))+geom_bar(position = "dodge")+ggtitle("Customer Satisfaction according to Type of Travel")+ theme_bw() +
+  theme()+ylab("Customer Volume") + xlab("Type of travel")+ theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+
+ggplot(data, aes(x=Class,fill=satisfaction))+geom_bar(position = "dodge")+ggtitle("Customer Satisfaction based on Class")+ theme_bw() +
+  theme()+ylab("Cusotmer Size") + xlab("Class")+ theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+
+ggplot(data, aes(x=Customer.Type,fill=satisfaction))+geom_bar(position = "dodge")+ggtitle("Customer Satisfaction according to Customer Type")+ylab("Cusotmer Size") + xlab("Customer type")+theme_bw()+theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+
+```
+
+
+
+We imported the `ggplot2` library for visualization and used the `ggplot()` function to plot the graphs.
+
+The gender distribution barplot shows a significant gender disparity, with a higher proportion of female respondents than males, potentially impacting overall satisfaction trends among surveyed airline passengers.
+
+Business travelers show higher satisfaction levels than personal travelers, but dissatisfaction remains consistent across both categories, indicating a significant portion of passengers is discontent.
+
+Passenger class significantly impacts satisfaction levels, with Business Class travelers reporting high satisfaction, while Eco Plus passengers show high dissatisfaction, indicating potential issues needing attention.
+
+The dataset categorizes passengers into loyal and disloyal customer types, showing satisfaction levels lag behind dissatisfaction among loyal customers, and alarmingly high dissatisfaction rates among disloyal customers.
+
+
+## Categorization of age into groups
+
+```{r,echo=FALSE}
+data <- within(data,{Age.cat = NA
+  Age.cat[Age<=20] = "Under 20"
+  Age.cat[Age>=21 & Age<= 40 ] = "20-40"
+  Age.cat[Age>=41 & Age<= 80 ] = "40-80"
+  Age.cat[Age>=80 ] = "above 80"})
+data$Age.cat<- factor(data$Age.cat,levels= c("Under 20","20-40","40-80","above 80"))
+```
+
+### Categorizing age based on distribution in the data
+```{r,echo=FALSE}
+data <- within(data,{Age.cat2 = NA
+  Age.cat2[Age<=20] = 1
+  Age.cat2[Age>=21 & Age<= 40 ] = 2
+  Age.cat2[Age>=41 & Age<= 80 ] = 3
+  Age.cat2[Age>=80 ] = 4})
+#data$Age.cat2<- factor(data$Age.cat2,levels= c("1","2","3","4"))
+```
+
+
+
+We created two new categorical variables named `Age.cat` and `Age.cat2` based on the values of the existing `Age` variable using the `within()` function. It categorizes individuals into age groups and then converts the new variables into a factor variable with specified levels.
+
+## Barplot of Categorized Age and Satisfaction
+
+```{r,echo=FALSE,results='markup'}
+
+ggplot(data, aes(x=Age.cat,fill=satisfaction))+geom_bar(position = "dodge")+ggtitle("Customer Satisfaction based on different Age Groups")+ylab("Passenger count") + xlab("Age Category")+theme_bw()+theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+```
+
+
+
+To understand the change of satisfaction levels with age, we have performed a barplot visualization.
+
+Barplots facilitate easy comparison of values across groups or categories, visually highlighting differences and trends in data by examining bar lengths to identify higher or lower values.
+
+We categorized ages into four sub-categories, and created a barplot using `ggplot()` to visualize satisfaction distribution based on age-wise data.
+
+The bar plot shows that passengers under 20 and 20-40 are generally dissatisfied with flight experiences, while those 40-80 are mostly satisfied, suggesting airlines can improve their services accordingly.
+
+## Boxplot of age and satisfaction
+```{r,echo=FALSE,results='markup'}
+ggplot(data = data, aes(x=as.character(satisfaction ), y=Age, fill=satisfaction)) +
+    geom_boxplot() +
+    labs(title="Boxplot of Age and Customer Satisfaction", x="Customer Satisfaction", y="Age")+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))+ scale_y_continuous(limits = c(0, 80))
+```
+
+
+
+The box plot analysis delving into the relationship between age and passenger satisfaction illuminates distinct patterns among neutral or dissatisfied passengers and satisfied passengers.
+
+Box plot analysis aids airlines in understanding passenger demographics and satisfaction levels, enabling them to customize services, enhance travel experience, and increase loyalty across diverse age groups.
+
+The study reveals that age significantly influences passenger satisfaction, with middle-aged passengers showing higher satisfaction, suggesting that airlines can better cater to different age groups.
+
+
+## Subsetting the data based on satisfaction
+```{r,include=FALSE}
+data_sat=subset(data4, data$satisfaction=='satisfied')
+data_dissat=subset(data4, data$satisfaction=='neutral or dissatisfied')
+```
+
+
+Using the `subset()` function, we have divided the data into two parts based on whether a customer is satisfied or neutral/dissatisfied as part of data pre-processing.
+
+## Boxplot between Satisfaction vs Arrival and Departure Delay
+```{r,echo=FALSE,results='markup'}
+ggplot(data4, aes(y = Departure.Delay.in.Minutes, fill = satisfaction)) +
+  geom_boxplot() +  
+  scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3")) + 
+  labs(title = "Boxplot of Departure delay vs satisfaction",
+       x = "Satisfaction", y = "Departure Delay (Minutes)") +
+  theme_minimal()+ scale_y_continuous(limits = c(0, 30))
+
+#```{r,echo=FALSE,results='markup'}
+ggplot(data4, aes(y = Arrival.Delay.in.Minutes, fill = satisfaction)) +
+  geom_boxplot() +  
+  scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3")) + 
+  labs(title = "Boxplot of Arrival delay vs satisfaction",
+       x = "Satisfaction", y = "Arrival delay") +
+  theme_minimal()+ scale_y_continuous(limits = c(0, 30))
+```
+
+
+
+The plots above are boxplots illustrating the relationship between satisfaction of the customers with respect to delay in arrival or departure in minutes.
+
+Dissatisfied customers have long arrival or departure delays, while those with less than 2 minutes delay tend to be more satisfied.
+
+We also attempted to remove the outliers generated in this plot using the `outlierKD2()` function, but some outlier points still remained.
+
+## Violin charts on satisfaction vs various in-flight amenities
+
+The Violin charts offer a comprehensive analysis of passenger satisfaction ratings for flight aspects such as entertainment, cleanliness, food, check-in service, and seat comfort.
+
+```{r,echo=FALSE,results='markup'}
+
+ggplot(data, aes(x = satisfaction, y = Inflight.entertainment, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction based on In-flight Entertainment Quality",
+       x = "Overall Satisfaction",
+       y = "Rating of In-flight Entertainment Quality")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+ggplot(data, aes(x = satisfaction, y = Cleanliness, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction based on Cleanliness",
+       x = "Overall Satisfaction",
+       y = "Rating of Cleanliness")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+ggplot(data, aes(x = satisfaction, y = Food.and.drink, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction based on Food and Drinks",
+       x = "Overall Satisfaction",
+       y = "Rating of Food and Drinks")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+ggplot(data, aes(x = satisfaction, y = Checkin.service, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction based on Check in Service",
+       x = "Overall Satisfaction",
+       y = "Rating of Check in Service")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+
+ggplot(data, aes(x = satisfaction, y = Seat.comfort, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction based on Seat Comfort",
+       x = "Overall Satisfaction",
+       y = "Rating of Seat comfort")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+```
+
+
+The violin charts highlight the unique patterns in every facet of the flight experience by graphically representing the differences in passenger satisfaction ratings. While dissatisfaction was distributed across lower ratings (0 to 5), the majority of satisfied passengers gave the in-flight entertainment high ratings (4 and 5). Similar trends may be seen in the ratings for food and drink, cleanliness, and overall satisfaction, with happy travelers often scoring higher (3 to 5) than indifferent or displeased travelers. The distribution of satisfaction with the check-in service was balanced, and passengers who were happy with their seat gave it excellent ratings (4 and 5).
+
+## Histogram of Flight distance vs satisfaction
+```{r,echo=FALSE,results='markup'}
+ggplot(data2,aes(x=Flight.Distance,fill=satisfaction))+geom_histogram(binwidth=500)+labs(title="Histogram of Flight Distance based on satisfaction",x="Flight Distance",y="Number of Passengers covering the corresponding flight distance")+theme_minimal()+ theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+```
+
+
+The `ggplot()` histogram shows flight distance and satisfaction levels, with satisfied customers covering 0-2000 nautical miles and neutral/dissatisfied ones covering longer distances, guiding businesses in data-driven decisions.
+
+
+## Boxplot of Flight Distance and satisfaction
+```{r,echo=FALSE,results='markup'}
+ggplot(data = data2, aes(x=as.character(satisfaction ), y=Flight.Distance, fill=satisfaction)) +
+    geom_boxplot() +
+    labs(title="Boxplot of Flight Distance vs Customer Satisfation ", x="Customer Satisfation ", y="Flight Distance")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+```
+
+
+
+We have plotted a boxplot above to visualize the relationship between customer satisfaction and flight distance.
+
+The analysis suggests airlines should customize services to cater to different customer segments, focusing on high-quality services for satisfied long-distance travelers and efficiency for neutral or dissatisfied short-distance travelers.
+
+
+## Boxplot of Flight distance vs Class and highlighted by satisfaction level
+```{r,echo=FALSE,results='markup'}
+
+ggplot(data2, aes(x = Class, y = Flight.Distance, fill = satisfaction)) +
+  geom_boxplot() +
+  labs(x = "Class type", y = "Flight Distance", title = "Box Plot of Flight Distance by Class and Satisfaction Level") +
+  scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+```   
+
+
+
+When three variables are explored and varied at the same time, the above kind of box plot is useful for understanding how the variables interact and affect one another.
+
+Based on the trends present in the data, this boxplot shows that people traveling in the business class are majorly satisfied with the services provided, even over long distances. In economy plus and economy classes, however, the passengers are mostly dissatisfied with the services even when the travel distance is short. 
+
+The visualization suggests that airlines should identify reasons for dissatisfaction among economy and economy plus class passengers and identify areas for improvement, such as increased leg room and better seat comfort, to enhance overall satisfaction.
+
+## Correlation matrix with respect to Satisfaction
+
+```{r,echo=FALSE,results='markup'}
+
+library(corrplot)
+
+data$satisfaction_numeric <- ifelse(data$satisfaction == "satisfied", 1, 0)
+
+var_columns <- c("Flight.Distance", "Inflight.wifi.service", "Departure.Arrival.time.convenient",
+                      "Ease.of.Online.booking", "Gate.location","Age", "Food.and.drink", "Online.boarding",
+                      "Seat.comfort", "Inflight.entertainment", "On.board.service", "Leg.room.service",
+                      "Baggage.handling", "Checkin.service", "Inflight.service", "Cleanliness","Arrival.Delay.in.Minutes","Departure.Delay.in.Minutes","satisfaction_numeric")
+
+correlation_matrix <- cor(data[var_columns])
+
+corrplot.mixed(correlation_matrix, tl.col = "black", tl.srt = 45,
+               tl.cex = 0.9, tl.offset = 1, tl.pos = "lt", lower = 'number', upper = 'pie', order = 'hclust')
+
+```
+
+
+
+We imported the `corrplot` library and used the `cor()` function to carry out the correlation evaluation and plotting.
+
+The matrix outlines passenger satisfaction-related characteristics ranging from 0 to 1, with high ratings given to in-flight amenities like Wi-Fi, convenient departure and arrival times, and ease of online booking. Other high ratings are given to on-board amenities, in-flight entertainment, seat comfort, cleanliness, and baggage handling. The overall satisfaction score is around 0.3, indicating a favorable review among the passengers. Interestingly, there are no extreme numbers, indicating a steady range of satisfaction levels for all assessed variables.
+
+# Statistical Testing
+
+## Chi-Squared Test on Satisfaction and Type of Travel
+
+**Chi-Square Test on satisfaction and Type of Travel**
+```{r,echo=FALSE,results='markup'}
+alpha=0.05
+ctest1 = chisq.test(data$satisfaction, data$Type.of.Travel)
+ctest1
+```
+
+
+We conducted a $\chi^2$ test between satisfaction level and type of travel of the passengers using the `chisq.test()` function. The standard $\alpha$ value has been set as `r alpha`.
+
+Null Hypothesis ($H_{0}$):
+There is no significant association between `Satisfaction` and `Type.of.Travel`.
+
+Alternative Hypothesis ($H_{A}$):
+There is a significant association between `Satisfaction` and `Type.of.Travel`.
+
+The $\chi^2$ test for Type of Travel and Satisfaction reveals a highly significant `p-value` of $`r ctest1$p.value`$. Therefore, there is strong evidence to reject the null hypothesis. This suggests that there is a considerable association between passenger satisfaction levels and the type of travel they are opting for.
+
+
+**Chi-Square Test on satisfaction and Class**
+```{r,echo=FALSE,results='markup'}
+alpha=0.05
+ctest2 = chisq.test(data$satisfaction, data$Class)
+ctest2
+```
+
+
+We conductes a $\chi^2$ test between Satisfaction and the travel class of the customers.
+
+Null Hypothesis ($H_{0}$):
+There is no significant association between `Satisfaction` and `Class`.
+
+Alternative Hypothesis ($H_{A}$):
+There is a significant association between `Satisfaction` and `Class`.
+
+The $\chi^2$ test for Class and Satisfaction yields a low `p-value` of $`r ctest2$p.value`$, providing compelling evidence against the null hypothesis, and we therefore can reject it. This indicates a significant relationship between passenger satisfaction levels and the class they are traveling in.
+
+**Chi-Square Test on satisfaction and Customer.Type**
+```{r,echo=FALSE,results='markup'}
+alpha=0.05
+ctest3 = chisq.test(data$satisfaction, data$Customer.Type)
+ctest3
+```
+
+
+We conducted a $\chi^2$ test between satisfaction and type of customer.
+
+Null Hypothesis ($H_{0}$):
+There is no significant association between `Satisfaction` and `Customer.Type`.
+
+Alternative Hypothesis ($H_{A}$):
+There is a significant association between `Satisfaction` and `Customer.Type`.
+
+The $\chi^2$ test for Customer Type and Satisfaction produces a highly significant `p-value` of $`r ctest3$p.value`$. Consequently, there is robust evidence to reject the null hypothesis, suggesting a significant association between passenger satisfaction and their customer type.
+
+The $\chi^2$ tests show significant relationships between passenger satisfaction and travel type, class, and customer type, emphasizing the importance of these factors in airlines' service significance and marketing strategies.
+
+
+**Chi-Square Test on satisfaction and Inflight.entertainment**
+
+```{r,echo=FALSE,results='markup'}
+c_test1 = chisq.test(data$satisfaction, data$Inflight.entertainment)
+c_test1
+```
+
+
+We conducted a $\chi^2$ test between satisfaction and inflight entertainment services.
+
+Analysis is as follows:
+
+Null Hypothesis ($H_{0}$):
+There is no significant association between `Satisfaction` and `Inflight.entertainment`.
+
+Alternative Hypothesis ($H_{A}$):
+There is a significant association between `Satisfaction` and `Inflight.entertainment`.
+
+In the analysis of in-flight entertainment, a highly significant `p-value` of $`r ctest1$p.value`$ indicates a robust association between the quality of entertainment services and passenger satisfaction. This underscores the importance of optimizing entertainment offerings to enhance overall passenger contentment. 
+
+
+**Chi-Square Test on satisfaction and Cleanliness**
+
+```{r,echo=FALSE,results='markup'}
+c_test2 = chisq.test(data$satisfaction, data$Cleanliness)
+c_test2
+```
+
+
+We conducted a $\chi^2$ test between satisfaction and cleanliness in the flight.
+
+Analysis is as follows:
+
+Null Hypothesis ($H_{0}$):
+There is no significant association between `Satisfaction` and `Cleanliness`.
+
+Alternative Hypothesis ($H_{A}$):
+There is a significant association between `Satisfaction` and `Cleanliness`.
+
+The $\chi^2$ test for cleanliness and satisfaction produces a highly significant `p-value` of $`r c_test2$p.value`$, emphasizing the pivotal role that cleanliness plays in shaping passenger perceptions. Maintaining high cleanliness standards throughout the flight is crucial for fostering positive passenger experiences.
+
+
+**Chi-Square Test on satisfaction and Food.and.drink**
+```{r,echo=FALSE,results='markup'}
+c_test3 = chisq.test(data$satisfaction, data$Food.and.drink)
+c_test3
+```
+
+
+As part of evaluating in-flight services, we have conducted a  $\chi^2$ test on satisfaction vs food and drinks.
+
+Analysis is as follows:
+
+Null Hypothesis ($H_{0}$):
+There is no significant association between `Satisfaction` and `Food.and.drink`.
+
+Alternative Hypothesis ($H_{A}$):
+There is a significant association between `Satisfaction` and `Food.and.drink`.
+
+The analysis of food and drink services reveals a significant connection between the quality of these services and passenger satisfaction levels. With a highly significant `p-value` of $`r c_test3$p.value`$, it is evident that diverse, high-quality food and beverage options significantly impact passenger contentment.
+
+
+**Chi-Square Test on satisfaction and Seat.comfort**
+```{r,echo=FALSE,results='markup'}
+c_test4 = chisq.test(data$satisfaction, data$Seat.comfort)
+c_test4
+```
+
+
+Next, we conducted a $\chi^2$ test between satisfaction level and seat comfort.
+
+Analysis is as follows:
+
+Null Hypothesis ($H_{0}$):
+There is no significant association between `Satisfaction` and `Seat.comfort`.
+
+Alternative Hypothesis ($H_{A}$):
+There is a significant association between `Satisfaction` and `Seat.comfort`.
+
+
+The $\chi^2$ test for seat comfort and satisfaction underscores the strong correlation between passenger satisfaction and the comfort of seating arrangements. Airlines need to invest in comfortable seating and amenities to ensure positive passenger experiences, as indicated by the highly significant `p-value` of $`r c_test4$p.value`$.
+
+The $\chi^2$ tests highlight the importance of factors affecting travelers' pleasure while flying, suggesting airlines should enhance in-flight entertainment, hygiene, food and drink offerings, and seat comfort.
+
+## T-Test Analysis
+
+**T-test on Satisfaction and Age **
+
+```{r,echo=FALSE,results='markup'}
+a<-t.test(Age~satisfaction,data = data)
+a
+paste("Value of P:",a$p.value)
+a$estimate[1]
+```
+
+
+T-tests widely used statistical method employed to ascertain whether there is a significant statistical distinction between the means of two distinct groups.
+
+The `p-value` derived from the t-test serves as an indicator of the likelihood that the observed disparity in means is merely a result of random chance. If this p-value is smaller than the alpha level, it suggests that the difference in means is statistically significant 
+
+In this case, the t-test is applied to the `Age` variable to evaluate if there is a noteworthy difference in the average ages of these two groups. We are examining the average ages of both "neutral/dissatisfied" and "satisfied" customers.
+
+The calculated mean age for the "neutral/dissatisfied" group is $`r a$estimate[1]`$, while for the "satisfied" group, it's $`r a$estimate[2]`$. 
+
+Based on the results of the t-test, where the standard $\alpha$ value is `r alpha` and the obtained `p-value` is $`r a$p.value`$, we can conclude that there is a statistically significant difference in the average ages between "neutral/dissatisfied" and "satisfied" customers.
+
+The fact that the `p-value` is $`r a$p.value`$ provides solid evidence to confirm that dissatisfied/neutral and satisfied customers can be considered as distinct age groups.
+
+
+**T Test on Arrival and Departure Delay in Minutes**
+
+```{r,echo=FALSE, results='markup'}
+b<-t.test(data4$Arrival.Delay.in.Minutes,data4$Departure.Delay.in.Minutes)
+
+b1<-t.test(Arrival.Delay.in.Minutes~satisfaction,data = data4)
+
+b2<-t.test(Departure.Delay.in.Minutes~satisfaction,data = data4)
+
+b
+b1
+b2
+```
+
+
+We first conducted an independent t-test using the `t.test()` function to determine if the two 
+variables `Arrival.Delay.in.Minutes` and `Departure.Delay.in.Minutes` have similar means.
+
+Analysis is as follows:
+
+Null Hypothesis ($H_{0}$):
+The mean of departure and arrival delay time is the same across all levels of satisfaction.
+
+Alternative Hypothesis ($H_{A}$):
+The mean of departure and arrival delay time is different for at least one pair of satisfaction levels.
+
+The `p-value` returned for arrival delay by the t-test is $`r b1$p.value`$ and for departure delay by the t-test is $`r b2$p.value`$. As a result, the null hypothesis is rejected, and the alternate hypothesis is accepted. We draw the conclusion that the mean is different for at least one pair of satisfaction levels.
+
+
+**T Test on 'Flight Distance' and Satisfaction**
+```{r,echo=FALSE,results='markup'}
+b3<-t.test(Flight.Distance~satisfaction,data = data)
+b3
+```
+
+We first conducted an independent t-test using the `t.test()` function to determine if the two variables `Flight.Distance` and `satisfcation` have similar means.
+
+Analysis is as follows:
+
+
+Null Hypothesis ($H_{0}$):
+The mean of flight distance is the same across all levels of satisfaction.
+
+
+Alternative Hypothesis ($H_{A}$):
+The mean of flight distance is different for at least one pair of satisfaction levels.
+
+The test found a significant difference in average flight distance among different customer satisfaction levels, as evidenced by a low `p-value` of $`r b3$p.value`$ (less than the standard $\alpha$ value of `r alpha`). We can therefore reject the null hypothesis and accept the alternative hypothesis to conclude that the mean of flight distance is different for at least one pair of satisfaction levels.
+
+## Analysis of Variance
+
+**ANOVA test on Age Category and Satisfaction**
+
+```{r,echo=FALSE,results='markup'}
+model<-aov(Age.cat2 ~ satisfaction,data=data)
+ezids::xkabledply(model,title="ANOVA test result of Age and Satisfaction")
+```
+
+
+We performed an ANOVA test on satisfaction and age category using the `aov()` function. We found that the p value is $`r summary(model)[[1]][["Pr(>F)"]][1]`$ is lower than $\alpha$=0.05, which means we can reject the null hypothesis of that satisfaction of customer staying the same around each age category ("Under 20", "20-40", "40-80", and "above 80"). The means of satisfaction scores for each of these age groups are compared using the ANOVA test to see if there are any statistically significant differences.
+
+
+# Conclusion
+
+Understanding customer satisfaction in the airline sector is challenging, but key trends include in-flight amenities, cleanliness, food and drink quality, and seat comfort. These components shape travelers' overall experience, emphasizing the importance of catering services, hygiene, and seat comfort.
+
+Arrival and departure delays are critical dissatisfaction points, requiring optimized logistic operations and tailored services for both short-haul and long-haul travelers to enhance customer satisfaction. Airlines also need to tailor their in-flight and on-boarding services for different age groups to increase the overall passenger satisfaction.
+
+The results offer airline promoters a road map for improving particular areas of their offerings, which will increase consumer loyalty, positive word-of-mouth, and profitability. In addition to being strategic, this dedication to perfection also reflects a desire to deliver outstanding customer service, which promises long-term success in a cutthroat market.
+
+
+# References
+
+  1. Tsafarakis, S., Kokotas, T., & Pantouvakis, A. (2018). A multiple criteria approach for airline passenger
+     satisfaction measurement and service quality improvement. Journal of air transport management, 68, 61-75.          
+        https://www.sciencedirect.com/science/article/abs/pii/S0969699717300704
+  
+  2. Namukasa, J. (2013). The influence of airline service quality on passenger satisfaction and loyalty: The case of Uganda airline industry. The TQM journal, 25(5), 520-532.                     https://www.emerald.com/insight/content/doi/10.1108/TQM-11-2012-0092/full/html
+  
+  3. Suki, N. M. (2014). Passenger satisfaction with airline service quality in Malaysia: A structural equation      modeling approach. Research in transportation business & management, 10, 26-32.                                                                                                                                                  https://www.sciencedirect.com/science/article/abs/pii/S2210539514000108 

@@ -1,0 +1,567 @@
+---
+title: "AIRLINE PASSENGER SATISFACTION"
+author: "TEAM 7- Richik Ghosh, Shreya Sahay, Sanika Narayanapethkar, Vamsidhar Boddu "
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+```{r}
+library(ezids)
+library(ggplot2)
+library(gridExtra)
+```
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = F, results = "hide", message = F)
+options(scientific=T, digits = 3) 
+```
+
+# Importing the Data
+
+```{r,echo=TRUE,results='markup'}
+
+data_pre<-data.frame(read.csv("/Users/richikghosh/Documents/Project Dats 6101/Airlines_train.csv"))
+data<-data_pre
+```
+
+We have read the dataset using `read.csv()` and stored it in a dataframe called `data`.
+
+# Structure of the data
+
+```{r,echo=TRUE,results='markup'}
+str(data)
+```
+
+We used `str()` function to study the structure of the data and further classified the variables into qualitative and quantitative types.
+
+from the help menu, we can see that the variables are:
+* `id`: customer id
+
+* `Gender`: male or female
+
+* `Customer.Type`: loyal or disloyal
+* `Age`: tells us the age in years 
+* `Type.Of.Travel`: personal or business
+* `Class`: business, eco, or eco plus
+* `Flight.Distance`: distance in nautical miles 
+* `Inflight.wifi.service`: rating of wifi service
+* `Departure.Arrival.time.convenient`: rating of time convenience 
+* `Ease.of.Online.booking`: rating of ease of convenience 
+* `Gate.location`: rating of gate location 
+* `Food.and.Drink`: rating of food and drink items served in-flight
+* `Online.boarding`: rating of boarding convenience
+* `Seat.comfort`: rating of comfort 
+* `Inflight.entertainment`: rating of how well customers were entertained 
+* `On.board.service`: rating of on-boarding service 
+* `Leg.room.service`: rating of space availability for legs
+* `Baggage.handling`: rating of handling baggage
+* `Checkin.service`: rating of check-in experience 
+* `Inflight.service`: rating of in-flight experience 
+* `cleanliness`: rating of cleanliness
+* `Departure.Delay.in.Minutes`: flight departure delay in minutes
+* `Arrival.Delay.in.minutes`: flight arrival delay in minutes  
+* `satisfaction`: rating of overall experience 
+
+**NOTE: All the ratings are on a scale of 0-5**
+
+
+These variables can be re-classified as:
+
+* Qualitative: `satisfaction`, `Class`, `Type.of.Travel`, `Gender`, `Customer.Type`
+
+* Quantitative: `id`, `Age`, `Flight.Distance`, `Inflight.wifi.service`, `Departure.Arrival.time.convenient`, `Ease.of.Online.booking`, `Gate.location`, `Food.and.Drink`, `Online.boarding`, `Seat.comfort`, `Inflight.entertainment`, `On.board.service`, `Leg.room.service`, `Baggage.handling`, `Checkin.service`, `Inflight.service`, `cleanliness`, `Departure.Delay.in.Minutes`, `Arrival.Delay.in.minutes`.
+
+# Data Preprocessing
+
+## Dropping columns
+
+```{r,echo=TRUE}
+data<- subset(data_pre, select = -c(X, id))
+```
+
+Using the `subset()` function we removed the `id` and `X` columns since they were helpful only for data retrieval/identification and do not contribute much to data analysis.
+
+## Factoring the variables
+```{r,echo=TRUE,results='markup'}
+data$satisfaction<-as.factor(data$satisfaction)
+data$Class<-as.factor(data$Class)
+data$Type.of.Travel<-as.factor(data$Type.of.Travel)
+data$Gender<-as.factor(data$Gender)
+data$Customer.Type<-as.factor(data$Customer.Type)
+```
+
+We did factoring of the qualitative variables for performing EDA. We converted `satisfaction`, `Class`, `Type.of.Travel`, `Gender` and `Customer.Type`. We use the `as.factor()` function.
+
+
+## Replacing the NA values with mean
+
+```{r,echo=TRUE,results='markup'}
+data$Arrival.Delay.in.Minutes[is.na(data$Arrival.Delay.in.Minutes)] = mean(data$Arrival.Delay.in.Minute,na.rm = TRUE)
+paste("The NA's in the dataset after Arrival Delay in Minute with mean is:",sum(is.na(data)))
+```
+ 
+
+We replaced the NA values with the mean. We used `sum(is.na())` method to calculate the `mean`. 
+
+## Removal of Outliers
+```{r,echo=TRUE,results='markup'}
+data2<-outlierKD2(data,Flight.Distance,rm=TRUE,boxplt = TRUE,qqplt = TRUE)
+data3<-outlierKD2(data,Departure.Delay.in.Minutes,rm=TRUE,boxplt = TRUE,qqplt = TRUE)
+data4<-outlierKD2(data3,Arrival.Delay.in.Minutes,rm=TRUE,boxplt = TRUE,qqplt = TRUE)
+```
+
+## Categorization of Age Groups
+
+```{r,echo=TRUE}
+data <- within(data,{Age.cat = NA
+  Age.cat[Age<=20] = "Under 20"
+  Age.cat[Age>=21 & Age<= 40 ] = "20-40"
+  Age.cat[Age>=41 & Age<= 80 ] = "40-80"
+  Age.cat[Age>=80 ] = "above 80"})
+data$Age.cat<- factor(data$Age.cat,levels= c("Under 20","20-40","40-80","above 80"))
+```
+```{r}
+data <- within(data,{Age.cat2 = NA
+  Age.cat2[Age<=20] = 1
+  Age.cat2[Age>=21 & Age<= 40 ] = 2
+  Age.cat2[Age>=41 & Age<= 80 ] = 3
+  Age.cat2[Age>=80 ] = 4})
+#data$Age.cat2<- factor(data$Age.cat2,levels= c("1","2","3","4"))
+```
+
+We created a new categorical variable named `Age.cat` based on the values of the existing `Age` variable. It categorizes individuals into age groups and then converts this new variable into a factor variable with specified levels. `within()` function is used to form new variable within the existing `dataset`.
+
+# Summary of the data
+
+```{r,echo=TRUE,results='markup'}
+paste("The NA's in the dataset column Arrival.Delay.in.Minutes is:",sum(is.na(data$Arrival.Delay.in.Minutes)))
+summary(data)
+```
+
+
+
+These lines of code generate a message that combines a text string with the `count` of `NA values` using the `is.na()` function in the `Arrival.Delay.in.Minutes` variable. The `summary()` function provides a statistical summary of the entire dataset.
+
+
+
+# Visualizations
+
+
+## Age distribution
+```{r,echo=TRUE,results='markup'}
+
+ggplot(data, aes(x=Age)) +  geom_density(fill="#9FA8DA", color="#9FA8DA", alpha=0.5)+ theme_bw() + theme()+ ggtitle("Passenger Age Distribution")+labs(title = "Passenger Age Distribution",
+       x = "Age",
+       y = "Density of the Customers")
+```
+## Barplot of Gender vs Satisfaction
+
+```{r,echo=TRUE,results='markup'}
+
+
+
+## Gender vs Satisfaction plot using bar plot
+
+gender_1 <- table(data$Gender)
+gender_dist <- as.data.frame(gender_1)
+names(gender_dist)<-c("Gender","Count")
+                      
+ggplot(gender_dist, aes(x = Gender, y = Count, fill = Gender)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Gender Distribution",
+       x = "Gender",
+       y = "Number of Customers") +
+  scale_fill_manual(values = c("Male" = "#F06292", "Female" = "#9FA8DA", "Other" = "gray")) +
+  theme_minimal()
+```
+
+## Barplot of Satisfaction
+
+```{r, echo=TRUE,results="show"}
+## Overall satisfaction insight of the passengers
+
+ggplot(data, aes(x=satisfaction,fill=satisfaction))+geom_bar()+ggtitle("Total Satisfied and Neutral or Unsatisfied customers in the Dataset")+ theme_bw() +
+  theme()+ ylab("Total Customers") + xlab("Feeling of the customer")+ theme(
+    axis.title.x = element_text(color = "#9FA8DA"),  
+    axis.title.y = element_text(color = "#F06292"),  
+    plot.title = element_text(color = "#AD1457"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+```
+
+
+## Barplot of dependencies of three varibles on Satisfaction of a customer
+
+```{r, echo=TRUE,results="show"}
+
+## Type of Travel vs Satisfaction plot using bar plot
+ggplot(data, aes(x=Type.of.Travel,fill=satisfaction))+geom_bar(position = "dodge")+ggtitle("Customer Satisfaction according to Type of Travel")+ theme_bw() +
+  theme()+ylab("Customer Volume") + xlab("Type of travel")+ theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+
+ggplot(data, aes(x=Class,fill=satisfaction))+geom_bar(position = "dodge")+ggtitle("Customer Satisfaction based on Class")+ theme_bw() +
+  theme()+ylab("Number of Cusotmers") + xlab("Class")+ theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+
+ggplot(data, aes(x=Customer.Type,fill=satisfaction))+geom_bar(position = "dodge")+ggtitle("Customer Satisfaction according to Customer Type")+ylab("Number of Cusotmers") + xlab("Customer type")+theme_bw()+theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+
+#grid.arrange(p1, p2, p3, p4, p5)
+
+```
+
+We called the packages `ggplot2` and `gridExtra` using the `library()` function.
+
+We count the frequency of each unique value in the `Gender` column and store this information in the gender_1 table.
+We use the `as.data.frame()` to convert the tabulated data into a format that's more suitable for data analysis.
+`names(gender_dist) <- c("Gender", "Count")` this step is often done to make the data frame more descriptive and easy to work with.
+
+We created a `barplot` using `ggplot()` that visualizes the `Gender` distribution based on the data in the gender_dist data frame. `stat =identity` argument indicates that the heights of the bars should be taken directly from the `Count` column in the data frame.
+
+We created a `density plot` using `ggplot()` that visualizes the distribution of `Age` in the `data` data frame.  The `alpha` argument controls the transparency of the density curve which set to .
+
+We created a `barplot` using `ggplot()` that visualizes the `satisfaction` (different levels of satisfaction) distribution based on the data in the `gender_dist` data frame.
+
+We created a `barplot` using `ggplot()` that compares `satisfaction` with different `Types.of.Travel` from the `data` data frame.
+
+We created a `barplot` using `ggplot()` that compares `satisfaction` for various `Classes` in the `data` dataset.
+
+We created a `barplot` using `ggplot()` that compares `satisfaction` for various `Customer.Type` in the `data` dataset.
+
+
+## Barplot of Customer Satisfaction based on different Age Groups
+```{r,echo=TRUE,results='markup'}
+ggplot(data, aes(x=Age.cat,fill=satisfaction))+geom_bar(position = "dodge")+ggtitle("Customer Satisfaction based on different Age Groups")+ylab("Number of Customers") + xlab("Age Category")+theme_bw()+theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))
+```
+
+We created a `barplot` using `ggplot()` that visualizes the `satisfaction` distribution based on the data in the `Age.cat` data frame.
+
+It can be deduced from the above bar plot that the age group that is under 20 and above 60 are compartively neutral or dissatisfied with the flight experience.
+
+## Boxplot age vs satisfaction of a customer
+```{r,echo=TRUE,results='markup'}
+ggplot(data = data, aes(x=as.character(satisfaction ), y=Age, fill=satisfaction)) +
+    geom_boxplot() +
+    labs(title="Boxplot of age and Customer Satisfaction", x="Customer Satisfaction", y="Age")+ scale_fill_manual(values = c("satisfied" = "#F06292", "neutral or dissatisfied" = "#9FA8DA", "Other" = "gray"))+ scale_y_continuous(limits = c(0, 80))
+```
+
+
+```{r,echo=TRUE}
+data_sat=subset(data4, data$satisfaction=='satisfied')
+data_dissat=subset(data4, data$satisfaction=='neutral or dissatisfied')
+```
+
+## Boxplot of departure delay vs satisfaction
+
+```{r,echo=TRUE,results='markup'}
+ggplot(data4, aes(y = Departure.Delay.in.Minutes, fill = satisfaction)) +
+  geom_boxplot() +  
+  scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3")) + 
+  labs(title = "Boxplot of departure delay vs satisfaction",
+       x = "Satisfaction", y = "Departure Delay (in Minutes)") +
+  theme_minimal()+ scale_y_continuous(limits = c(0, 30))
+```
+## Boxplot of arrival delay vs satisfaction
+
+```{r,echo=TRUE,results='markup'}
+ggplot(data4, aes(y = Arrival.Delay.in.Minutes, fill = satisfaction)) +
+  geom_boxplot() +  
+  scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3")) + 
+  labs(title = "Boxplot of arrival delay vs satisfaction",
+       x = "Satisfaction", y = "Arrival delay (in Minutes)") +
+  theme_minimal()+ scale_y_continuous(limits = c(0, 30))
+```
+
+We created a `boxplot` using `ggplot()` that compares `satisfaction` with `Age`.
+
+
+## VIOLIN CHART AND CORREALATION COEFFICIENT
+
+```{r,echo=TRUE,results='markup'}
+library(ggplot2)
+
+ggplot(data, aes(x = satisfaction, y = Inflight.entertainment, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction vs. In-flight Entertainment Quality",
+       x = "Overall Satisfaction",
+       y = "In-flight Entertainment Quality")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+ggplot(data, aes(x = satisfaction, y = Cleanliness, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction vs. Cleanliness",
+       x = "Overall Satisfaction",
+       y = "Cleanliness of the flight")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+ggplot(data, aes(x = satisfaction, y = Food.and.drink, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction vs. Food and Drinks",
+       x = "Overall Satisfaction",
+       y = "Food and Drinks")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+ggplot(data, aes(x = satisfaction, y = Checkin.service, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction vs. Check in Service",
+       x = "Overall Satisfaction",
+       y = "Check in Service")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+
+ggplot(data, aes(x = satisfaction, y = Seat.comfort, fill = satisfaction)) +
+  geom_violin() +
+  labs(title = "Overall Satisfaction vs. Seat Comfort",
+       x = "Overall Satisfaction",
+       y = "Seat comfort")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+
+
+cor_Inflight <- cor(data$Inflight.entertainment, as.numeric(factor(data$satisfaction)))
+print(paste("Correlation coefficient based on Overall Satisfaction and Inflight Entertainment:", cor_Inflight))
+
+cor_clean <- cor(data$Cleanliness, as.numeric(factor(data$satisfaction)))
+print(paste("Correlation coefficient based on Overall Satisfaction and Cleanlimess:", cor_clean))
+
+cor_food <- cor(data$Food.and.drink, as.numeric(factor(data$satisfaction)))
+print(paste("Correlation coefficient based on Overall Satisfaction and Food and Drinks:", cor_food))
+
+cor_checkin <- cor(data$Checkin.service, as.numeric(factor(data$satisfaction)))
+print(paste("Correlation coefficient based on Overall Satisfaction and Check in Service:", cor_checkin))
+
+cor_seat <- cor(data$Seat.comfort, as.numeric(factor(data$satisfaction)))
+print(paste("Correlation coefficient based on Overall Satisfaction and Seat Comfort:", cor_seat))
+```
+
+We created `violin plots` using `ggplot()` and calculate the correlation coefficients between
+`Satisfaction` and different aspects of the flight experience.
+
+
+We use the `geom_violin()` function in `ggplot()` to create a plot that shows the distribution of `Inflight.Entertainment` for each level of `Satisfaction`. Then we print the correlation coefficient between `Inflight.entertainment` and `satisfaction`using the `cor()` function.
+
+We use the `geom_violin()` function in `ggplot()` to create a plot that shows the distribution of `Cleanliness` for each level of `Satisfaction`. Then we print the correlation coefficient between `Cleanliness` and `satisfaction`using the `cor()` function.
+
+We use the `geom_violin()` function in `ggplot()` to create a plot that shows the distribution of `Food.and.drink` for each level of `Satisfaction`. Then we print the correlation coefficient between `Food.and.drink` and `satisfaction`using the `cor()` function.
+
+
+We use the `geom_violin()` function in `ggplot()` to create a plot that shows the distribution of `Checkin.service` for each level of `Satisfaction`. Then we print the correlation coefficient between `Checkin.service` and `satisfaction`using the `cor()` function.
+
+We use the `geom_violin()` function in `ggplot()` to create a plot that shows the distribution of `Seat.comfort` for each level of `Satisfaction`. Then we print the correlation coefficient between `Seat.comfort` and `satisfaction`using the `cor()` function.
+
+
+## HISTOGRAM of flight distance travelled by a customer
+```{r,echo=TRUE,results='markup'}
+ggplot(data2,aes(x=Flight.Distance,fill=satisfaction))+geom_histogram(binwidth=500)+labs(title="Histogram of frequency of Flight Distance based on satisfaction",x="Flight.Distance",y="Frequency")+theme_minimal()+ theme(
+    axis.title.x = element_text(color = "black"),  
+    axis.title.y = element_text(color = "black"),  
+    plot.title = element_text(color = "black"),   
+    axis.text.x = element_text(color = "black"))+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+```
+
+We will make a `histogram` using `ggplot()` to visualize the relationship between `satisfaction` and `Flight.Distance`.
+
+
+
+## BOXPLOT of flight distance and customer satisfaction
+```{r,echo=TRUE,results='markup'}
+ggplot(data = data2, aes(x=as.character(satisfaction ), y=Flight.Distance, fill=satisfaction)) +
+    geom_boxplot() +
+    labs(title="Boxplot of Flight Distance vs Customer Satisfation ", x="Customer Satisfation ", y="Flight Distance")+scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+```
+`boxplot` using `ggplot()` to visualize the relationship between `satisfaction` and `Flight.Distance`.
+
+## Box Plot of Flight Distance by Class and Satisfaction Level
+```{r,echo=TRUE,results='markup'}
+
+ggplot(data2, aes(x = Class, y = Flight.Distance, fill = satisfaction)) +
+  geom_boxplot() +
+  labs(x = "Class", y = "Flight Distance", title = "Box Plot of Flight Distance by Class and Satisfaction Level") + scale_fill_manual(values = c("satisfied" = "lightblue3", "neutral or dissatisfied" = "lightpink3"))
+
+```
+
+## Correlation Plot of the dataset
+
+```{r,echo=TRUE,results='markup'}
+library(corrplot)
+
+data$satisfaction_numeric <- ifelse(data$satisfaction == "satisfied", 1, 0)
+
+var_columns <- c("Flight.Distance", "Inflight.wifi.service", "Departure.Arrival.time.convenient",
+                      "Ease.of.Online.booking", "Gate.location","Age", "Food.and.drink", "Online.boarding",
+                      "Seat.comfort", "Inflight.entertainment", "On.board.service", "Leg.room.service",
+                      "Baggage.handling", "Checkin.service", "Inflight.service", "Cleanliness","Arrival.Delay.in.Minutes","Departure.Delay.in.Minutes","satisfaction_numeric")
+
+correlation_matrix <- cor(data[var_columns])
+
+corrplot.mixed(correlation_matrix, tl.col = "black", tl.srt = 45,
+               tl.cex = 0.9, tl.offset = 1, tl.pos = "lt", lower = 'number', upper = 'pie', order = 'hclust')
+
+```
+
+
+# Statistical Tests
+
+## CHI-SQUARE TEST ON THREE VARIABLES
+```{r,echo=TRUE,results='markup'}
+alpha=0.05
+ctest1 = chisq.test(data$satisfaction, data$Type.of.Travel)
+
+ctest2 = chisq.test(data$satisfaction, data$Class)
+
+ctest3 = chisq.test(data$satisfaction, data$Customer.Type)
+
+ctest1
+ctest2
+ctest3
+```
+
+
+
+We have conducted `chisq.test()` to find the $\chi^2$ analysis on three variables - `Type.of.Travel`, `Class`, `Customer.Type`.
+
+Analysis is as follows:
+
+
+Null Hypothesis ($H_{0}$):
+There is no significant association between `Satisfaction` and `Type.of.Travel`, `Class`, `Customer.Type`, respectively.
+
+Alternative Hypothesis($H_{A}$):
+There is a significant association between `Satisfaction` and `Type.of.Travel`, `Class`, `Customer.Type`, respectively.
+
+
+The `p-value` returned by the $\chi^2$ test in comparison of satisfaction and `Type.of.Travel` is  $`r ctest1$p.value`$ then satisfaction and `Class` is  $`r ctest2$p.value`$ and finally satisfaction and `Customer.Type` is  $`r ctest3$p.value`$, which are less than the standard  $\alpha$=0.05. As a result, the null hypothesis is rejected, and the alternate hypothesis is accepted. We may draw the conclusion that there is significant association between `Satisfaction` and `Type.of.Travel`,  `Class`, `Customer.Type`, respectively.
+
+
+## T-test on `age` variable
+
+```{r,echo=TRUE,results='markup'}
+a<-t.test(Age~satisfaction,data = data)
+a
+```
+
+We performed a T-Test using the `t.test()` function and it can be observed that the means of the neutral/dissatisfied and satisfied are different with respective values of 37.6 and 41.8. The `p-value` of $`r a$p.value`$ is less than $\alpha$=0.05 which indicates that the dissatisfied/neutral and satisfied customers have different age groups
+
+## Anova test on age category and satisfaction
+
+```{r,echo=TRUE,results='markup'}
+model<-aov(Age.cat2 ~ satisfaction,data=data)
+ezids::xkabledply(model,title="Anova test result of Age and Satisfaction")
+
+```
+We performed an ANOVA test on satisfaction and age category using `aov()` function. We found that the p value is $`r summary(model)[[1]][["Pr(>F)"]][1]`$ is lower than $\alpha$=0.05, which means we can reject the null hypothesis of that satisfaction of customer staying the same around each age category ("Under 20", "20-40", "40-80", and "above 80"). The means of satisfaction scores for each of these age groups are compared using the ANOVA test to see if there are any statistically significant differences.
+
+
+## T test on arrival and departure delay
+
+```{r,echo=TRUE,results='markup'}
+b<-t.test(data4$Arrival.Delay.in.Minutes,data4$Departure.Delay.in.Minutes)
+print(b)
+```
+
+Analysis is as follows:
+Null Hypothesis($H_{0}$):
+The mean of departure and arrival delay time are same 
+
+Alternative Hypothesis($H_{A}$):
+The mean of departure and arrival delay time are different 
+
+The `p-value` returned by comparing arrival delay and departure delay is $`r b$p.value`$ which is lower than $\alpha$=0.05. Thus, we can reject the null hypothesis and say departure and arrival delay time are different.
+
+## T-test on arrival and departure delay and satifaction
+
+
+```{r,echo=TRUE,results='markup'}
+b1<-t.test(Arrival.Delay.in.Minutes~satisfaction,data = data4)
+b2<-t.test(Departure.Delay.in.Minutes~satisfaction,data = data4)
+
+
+print(b1)
+print(b2)
+
+```
+
+
+We first conducted an independent t-test using the `t.test()` function to determine if the two 
+variables `Arrival.Delay.in.Minutes` and `Departure.Delay.in.Minutes` have similar means.
+
+
+Analysis is as follows:
+Null Hypothesis($H_{0}$):
+The mean of departure and arrival delay time is the same across all levels of satisfaction.
+
+Alternative Hypothesis($H_{A}$):
+The mean of departure and arrival delay time is different for at least one pair of satisfaction levels.
+
+The `p-value` returned for arrival delay by the $t-test$ is $`r b1$p.value`$ and for departure delay by the $t-test$ is $`r b2$p.value`$. As a result, the null hypothesis is rejected, and the alternate hypothesis is accepted. We draw the conclusion that the mean is different for at least one pair of satisfaction levels.
+
+
+## CHI-SQUARE TEST on satisfaction and inflight details
+```{r,echo=TRUE,results='markup'}
+ctest1 = chisq.test(data$satisfaction, data$Inflight.entertainment)
+ctest2 = chisq.test(data$satisfaction, data$Cleanliness)
+ctest3 = chisq.test(data$satisfaction, data$Food.and.drink)
+ctest4 = chisq.test(data$satisfaction, data$Seat.comfort)
+
+print(ctest1)
+print(ctest2)
+print(ctest3)
+print(ctest4)
+```
+
+
+
+We have conducted `chisq.test` to find the $\chi^2$ on four variables - `Inflight.entertainment`, `Cleanliness`, `Food.and.drink`, `Seat.comfort`.
+
+Analysis is as follows:
+
+
+Null Hypothesis($H_{0}$):
+There is no significant association between `Satisfaction` and `Inflight.entertainment`, `Cleanliness`, `Food.and.drink`, `Seat.comfort` respectively.
+
+Alternative Hypothesis($H_{A}$):
+There is a significant association between `Satisfaction` and `Inflight.entertainment`,  `Cleanliness`, `Food.and.drink`, `Seat.comfort` respectively.
+
+
+The `p-value` returned by the $\chi^2$ test on `Inflight.entertainment`,  `Cleanliness`, `Food.and.drink`, `Seat.comfort` is `p-value` of $`r ctest1$p.value`$, $`r ctest2$p.value`$, $`r ctest3$p.value`$, $`r ctest4$p.value`$ which are lesser than $\alpha$=0.05 respectively. As a result, the null hypothesis is rejected, and the alternate hypothesis is accepted. We may draw the conclusion that there is significant association between `Satisfaction` and `Inflight.entertainment`,  `Cleanliness`, `Food.and.drink`, `Seat.comfort` respectively.
+
+
+## T test on flight distance and satisfaction
+```{r,echo=TRUE,results='markup'}
+k<-t.test(Flight.Distance~satisfaction,data = data)
+```
+
+
+
+We first conducted an independent t-test using the `t.test()` function to determine if the two 
+variables `Flight.Distance` and `satisfcation` have similar means.
+Analysis is as follows:
+
+Null Hypothesis($H_{0}$):
+The mean flight distance is the same across all levels of satisfaction
+
+
+Alternative Hypothesis($H_{A}$):
+The mean flight distance is different for at least one pair of satisfaction levels.
+
+
+The `p-value` returned by the $t-test$ is `p-value` of $`r k$p.value`$ is less than $\alpha$=0.05. As a result, the null hypothesis is rejected, and the alternate hypothesis is accepted. We may draw the conclusion that the mean is different for at least one pair of satisfaction levels.
+
